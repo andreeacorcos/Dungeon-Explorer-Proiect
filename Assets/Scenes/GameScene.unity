@@ -476,6 +476,105 @@ Transform:
   - {fileID: 264914236}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &829163820
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 829163825}
+  - component: {fileID: 829163824}
+  - component: {fileID: 829163823}
+  - component: {fileID: 829163822}
+  - component: {fileID: 829163821}
+  m_Layer: 0
+  m_Name: EnemySystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &829163821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829163820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f74aeb2cffaae444b4c9d76d562a0f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DebugHUD
+  waveSpawner: {fileID: 829163823}
+--- !u!114 &829163822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829163820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5083272be14b34dab2a30d68c3f0f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootDropper
+  coinPrefab: {fileID: 3107652368285916262, guid: ed10075ae42c2364ab2df8373ef6d8b5, type: 3}
+  coinsInBag: 1
+  emptiesInBag: 2
+--- !u!114 &829163823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829163820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0db0d1dc2256044abc416b6168b39f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
+  waveData: {fileID: 11400000, guid: cd79ec8c8f199414b9e84ac1d8617ac6, type: 2}
+  factory: {fileID: 829163824}
+  spawnArea: {fileID: 2133854024}
+  edgeInset: 1
+  minDistanceFromPlayer: 4
+  spawnMarkerPrefab: {fileID: 2072357702826845474, guid: abef02a8cca01b54ea13bdbe4ddc9c72, type: 3}
+  telegraphTime: 0.6
+  keyPrefab: {fileID: 3430326400886589862, guid: d822a2574deb2f54083581cac7fac1a7, type: 3}
+  autoStart: 1
+--- !u!114 &829163824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829163820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dee0db0715fc2242b774a38b4f872d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFactory
+  enemyPrefab: {fileID: 2113144106525923005, guid: a92a1e8c684caad43adcaa2d1283f972, type: 3}
+  prewarmCount: 10
+  maxPoolSize: 50
+--- !u!4 &829163825
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829163820}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2133854021
 GameObject:
   m_ObjectHideFlags: 0
@@ -2929,3 +3028,4 @@ SceneRoots:
   - {fileID: 619394802}
   - {fileID: 684940508}
   - {fileID: 8619308505392679324}
+  - {fileID: 829163825}

@@ -7,6 +7,7 @@ public class PlayerScript : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 movement;
+    private float knockbackUntil; // pana cand miscarea e controlata de knockback, nu de input
 
     void Awake(){
         rb = GetComponent<Rigidbody2D>();
@@ -26,7 +27,21 @@ public class PlayerScript : MonoBehaviour
     //A, GetAxisRaw("Horizontal") returneaza -1, daca apesi D returneaza 1 daca nu apesi
     //ceva returneaza 0. Acelasi concept si pentru Vertical
     //Dupa normalizam vectorul de miscare sa nu ne miscam mai repede pe diagonala
-    
-    void FixedUpdate(){rb.linearVelocity = movement * speed;}
+
+    void FixedUpdate(){
+        //In timpul knockback-ului nu suprascriem viteza, altfel impingerea ar disparea instant
+        if (Time.time < knockbackUntil) return;
+        rb.linearVelocity = movement * speed;
+    }
     //FixedUpdate deoarece operatia aceasta tine de fizica
+
+    // Impinge jucatorul (ex: cand e lovit de un inamic) pentru o durata scurta.
+    public void ApplyKnockback(Vector2 velocity, float duration){
+        knockbackUntil = Time.time + duration;
+        rb.linearVelocity = velocity;
+    }
+
+    private void OnDisable(){
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+    }
 }

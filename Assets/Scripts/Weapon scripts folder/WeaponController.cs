@@ -2,6 +2,7 @@
 // -- Playing weapon animations (TODO)
 // -- Handling weapon attacks
 // -- Aim weapon towards the mouse
+// -- Dealing damage through WeaponHitbox
 */
 using UnityEngine;
 using System.Collections;
@@ -11,26 +12,40 @@ public class WeaponController : MonoBehaviour
     [Header("Weapon")]
     [SerializeField] private WeaponData startingWeapon; // "Default" weapon
     [SerializeField] private Transform weaponPivot; // The point which the weapon spins around
-    //[SerializeField] private SpriteRenderer weaponRenderer;
+    [SerializeField] private SpriteRenderer weaponRenderer; // Shows the weapon sprite
     [SerializeField] private BoxCollider2D hitbox; // Hitbox of the weapon
+    [SerializeField] private WeaponHitbox weaponHitbox; // Detects what the hitbox touches
+
+    [Header("Game feel")]
+    [SerializeField] private float hitStopDuration = 0.05f; // freeze on impact (0 = off)
+
     private WeaponData currentWeapon; // The actual weapon
     private bool isAttacking = false; // Used to enable/disable weapon hitbox
     private float nextAttackTime = 0f; // Used for attack cooldown
-    
+    private Camera mainCamera;
+
+    public bool IsAttacking => isAttacking;
+    public WeaponData CurrentWeapon => currentWeapon;
+
     private void Awake()
     {
+        mainCamera = Camera.main;
+        if (weaponHitbox == null && hitbox != null)
+            weaponHitbox = hitbox.GetComponent<WeaponHitbox>();
+        if (weaponHitbox != null)
+            weaponHitbox.Init(this);
+
         EquipWeapon(startingWeapon);
         hitbox.enabled = false;
     }
-    
-    void Start()
-    {
-        
-    }
+
     void AimAtMouse(){
+        if (mainCamera == null) mainCamera = Camera.main;
+        if (mainCamera == null) return;
+
         Vector3 mousePosition = Input.mousePosition;
-        mousePosition.z = -Camera.main.transform.position.z;
-        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        mousePosition.z = -mainCamera.transform.position.z;
+        mousePosition = mainCamera.ScreenToWorldPoint(mousePosition);
         //converts coordinates from (0,0) - (1920,1080) screen positions to world coordinates
         Vector2 direction = mousePosition - weaponPivot.position;
         //calculates direction between converted mouse position and weapon pivot's position
@@ -40,14 +55,28 @@ public class WeaponController : MonoBehaviour
         weaponPivot.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
-    void EquipWeapon(WeaponData newWeapon){
+    // Public, so that weapon pickups on later levels can change the weapon.
+    public void EquipWeapon(WeaponData newWeapon){
         currentWeapon = newWeapon;
+        if (newWeapon == null) return;
+
+        // The weapon points along the pivot's local "up" (see the -90 in AimAtMouse).
+        if (hitbox != null)
+        {
+            hitbox.transform.localPosition = new Vector3(0f, newWeapon.HoldDistance, 0f);
+            hitbox.size = newWeapon.HitboxSize;
+            hitbox.offset = Vector2.zero;
+        }
+        if (weaponRenderer != null)
+            weaponRenderer.sprite = newWeapon.WeaponSprite;
     }
 
     // Update is called once per frame
     void Update()
     {
-        AimAtMouse();
+        // While attacking, the animation controls the rotation.
+        if (!isAttacking)
+            AimAtMouse();
         if(Input.GetButton("Fire1"))
             TryAttack();
     }
@@ -56,6 +85,19 @@ public class WeaponController : MonoBehaviour
         if(currentWeapon == null || isAttacking || Time.time < nextAttackTime)
             return; //If the player doesn't have a weapon, is already attacking or attack is on cooldown, don't attack
         currentWeapon.Attack(this);
+    }
+
+    // Called by WeaponHitbox when the weapon touches something damageable.
+    public void OnWeaponHit(IDamageable target, Collider2D targetCollider)
+    {
+        if (currentWeapon == null) return;
+
+        Vector2 direction = (Vector2)(targetCollider.transform.position - transform.position);
+        direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : (Vector2)weaponPivot.up;
+
+        DamageInfo info = new DamageInfo(currentWeapon.Damage, direction, currentWeapon.Knockback, gameObject);
+        if (target.TakeDamage(info))
+            HitStop.Freeze(hitStopDuration);
     }
 
     public void PerformMeleeAttack(MeleeWeaponData weapon)
@@ -70,6 +112,8 @@ public class WeaponController : MonoBehaviour
     private IEnumerator MeleeAnimation(MeleeWeaponData weapon)
     {
         isAttacking = true;
+        if (weaponHitbox != null)
+            weaponHitbox.BeginAttack();
         hitbox.enabled = true;
 
         Vector3 originalPosition = weaponPivot.localPosition;
@@ -100,26 +144,27 @@ public class WeaponController : MonoBehaviour
         }
         else if (weapon.AttackType == MeleeAttackType.Stab)
         {
-            // Move forward, then return.
-            float halfDuration = weapon.AttackDuration / 2f;
+            // Move forward (towards the mouse), then return.
+            // First half of the duration: forward. Second half: back.
+            Vector3 forward = originalRotation * Vector3.up;
 
             while (elapsed < weapon.AttackDuration)
             {
                 elapsed += Time.deltaTime;
 
                 float progress = Mathf.Clamp01(
-                    elapsed / halfDuration);
+                    elapsed / weapon.AttackDuration);
 
                 float distance;
 
-                if (progress <= 1f)
-                    distance = Mathf.Lerp(0f, weapon.StabDistance, progress);
+                if (progress <= 0.5f)
+                    distance = Mathf.Lerp(0f, weapon.StabDistance, progress * 2f);
                 else
                     distance = Mathf.Lerp(
-                        weapon.StabDistance, 0f, progress - 1f);
+                        weapon.StabDistance, 0f, (progress - 0.5f) * 2f);
 
                 weaponPivot.localPosition =
-                    originalPosition + Vector3.up * distance;
+                    originalPosition + forward * distance;
 
                 yield return null;
             }
@@ -130,5 +175,13 @@ public class WeaponController : MonoBehaviour
 
         hitbox.enabled = false;
         isAttacking = false;
+    }
+
+    private void OnDisable()
+    {
+        // If the player dies mid-attack, leave the weapon in a clean state.
+        StopAllCoroutines();
+        isAttacking = false;
+        if (hitbox != null) hitbox.enabled = false;
     }
 }

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8b62c7e13079f943a0a88f06f88718a, type: 3}
+  m_Name: Spear
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeWeaponData
+  damage: 10
+  attacksPerSecond: 1.5
+  knockback: 4
+  weaponSprite: {fileID: 21300000, guid: 88501bebbe4588b4798e3eb2b7276f64, type: 3}
+  holdDistance: 0.9
+  hitboxSize: {x: 0.25, y: 1.5}
+  attackType: 1
+  attackDuration: 0.3
+  swingAngle: 0
+  stabDistance: 1
